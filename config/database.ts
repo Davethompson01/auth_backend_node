@@ -1,25 +1,45 @@
-import mysw from 'mysql2/promise'
-import dotenv from "dotenv"
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+import Utilis from "../assets/controller/utilis.ts";
+const utils = new Utilis();
 
-dotenv.config()
 
-let connected = ''
-// connection pool
-export const db = (connected) => mysql.createpool({
+dotenv.config();
+
+export default class Database {
+  private static pool: mysql.Pool;
+
+  public static async connect() {
     try {
-        if(connected){
-            host: process.env.DB_HOST,
-    name: process.env DB_NAME,
-    password: process.env.DB_PASSWORD,
-    username: process.env.DB_USERNAME
+      if (!Database.pool) {
+        Database.pool = mysql.createPool({
+          host: process.env.DB_HOST!,
+          user: process.env.DB_USERNAME!,
+          password: process.env.DB_PASSWORD!,
+          database: process.env.DB_NAME!,
+          waitForConnections: true,
+          connectionLimit: 10,
+          queueLimit: 0,
+        });
 
-    
+        // console.log("Created MySQL connection pool, testing connection...");
 
-        }
-    } catch(error){
+        const connection = await Database.pool.getConnection();
+        await connection.query("SELECT 1");
+        connection.release();
 
+        // console.log(" Successfully connected to MySQL database");
+      }
+
+
+      return Database.pool;
+    } catch (error: any) {
+      console.error("Database connection failed:", error.message);
+      //const utils = new Utilis();
+      return error.message;
     }
-    return connected
-})
+  }
+}
 
-
+// Test the connection
+Database.connect()
