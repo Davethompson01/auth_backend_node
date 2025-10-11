@@ -73,23 +73,36 @@ export default class SQL {
     }
 
     // SELECT
-    public async select(table: string, columns: string[] = ["*"], condition?: string) {
-        if (!this.validateIdentifier(table))
-            return utils.returnData(false, "Invalid table name", table);
-
-        const check = this.validateColumns(columns);
-        if (!check.success) return check;
-
-        const sql = `SELECT ${columns.join(", ")} FROM ${table}` + (condition ? ` WHERE ${condition}` : "");
-
-        try {
-            const db = await this.db_connect();
-            const [rows] = await db.query(sql);
-            return utils.returnData(true, "Select successful", rows);
-        } catch (error: any) {
-            return utils.returnData(false, `Select failed: ${error.message}`, {});
-        }
+    public async select(
+    table: string,
+    columns: string[] = ["*"],
+    condition?: string,
+    params: any[] = [] 
+) {
+    if (!this.validateIdentifier(table)) {
+        return utils.returnData(false, "Invalid table name", table);
     }
+
+    const columnCheck = this.validateColumns(columns);
+    if (!columnCheck.success) return columnCheck;
+
+   
+    let sql = `SELECT ${columns.join(", ")} FROM ${table}`;
+
+    // Add condition if provided
+    if (condition) {
+        sql += ` WHERE ${condition}`;
+    }
+
+    try {
+        const db = await this.db_connect();
+        const [rows] = await db.query(sql, params);
+        return utils.returnData(true, "Select successful", rows);
+    } catch (error: any) {
+        return utils.returnData(false, `Select failed: ${error.message}`, []);
+    }
+}
+
 
     //  DELETE
     public async delete(table: string, condition: string) {
@@ -112,12 +125,38 @@ export default class SQL {
 
 
     public async dropDatabase(dbName: string) {
-    try {
-        const db = await this.db_connect();
-        await db.query(`DROP DATABASE IF EXISTS \`${dbName}\``);
-        return utils.returnData(true, `Database '${dbName}' dropped successfully`, {});
-    } catch (error: any) {
-        return utils.returnData(false, `Error dropping database: ${error.message}`, {});
+        try {
+            const db = await this.db_connect();
+            await db.query(`DROP DATABASE IF EXISTS \`${dbName}\``);
+            return utils.returnData(true, `Database '${dbName}' dropped successfully`, {});
+        } catch (error: any) {
+            return utils.returnData(false, `Error dropping database: ${error.message}`, {});
+        }
     }
-}
+
+
+
+    public async exists(
+        table: string,
+        condition: string,
+        params: any[] = []
+    ) {
+        if (!this.validateIdentifier(table)) {
+            return utils.returnData(false, "Invalid table name", table);
+        }
+
+        const sql = `SELECT EXISTS(SELECT 1 FROM ${table} WHERE ${condition}) AS found`;
+
+        try {
+            const db = await this.db_connect();
+            const [rows]: any = await db.query(sql, params);
+
+            
+            const exists = rows[0].found === 1;
+            return utils.returnData(true, "Check successful", exists);
+        } catch (error: any) {
+            return utils.returnData(false, `Exists check failed: ${error.message}`, false);
+        }
+    }
+
 }
