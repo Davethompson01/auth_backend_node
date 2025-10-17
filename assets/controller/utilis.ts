@@ -8,7 +8,7 @@ import { memoryUsage } from 'process';
 export default class utilis {
 
 
-    public returnData(success: boolean, message: string, data: any) {
+    public returnData(success: boolean, message: string, data: any = null) {
         return {
             success,
             message,
@@ -18,8 +18,12 @@ export default class utilis {
     }
 
 
+    public sendResponse(res: any, statusCode: number, success: boolean, message: string, data: any = null) {
+        return res.status(statusCode).json(this.returnData(success, message, data))
+    }
+
     // generate random alphanumeric`
-    public generateAlphaNumeric(length: number = 16) {
+    public async generateAlphaNumeric(length: number = 16) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let results = '';
 
