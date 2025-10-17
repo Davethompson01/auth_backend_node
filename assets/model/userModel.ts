@@ -19,7 +19,7 @@ export default class userModel{
         if (sql.data === 1) {
             return this.utilis.returnData(true, "Email already exists", []);
         } else {
-            return this.utilis.returnData(true, "No record found", sql);
+            return this.utilis.returnData(false, "No record found", sql);
         }
     }
 

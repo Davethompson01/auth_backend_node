@@ -36,16 +36,21 @@ export default class SQL {
         if (!this.validateIdentifier(tableName))
             return utils.returnData(false, "Invalid table name", tableName);
 
+        let sql = "";
+
         try {
             const db = await this.db_connect();
-            const sql = `CREATE TABLE IF NOT EXISTS ${tableName} (${schema})`;
-            await db.query(sql); // <-- This probably returns undefined
+            sql = `CREATE TABLE IF NOT EXISTS \`${tableName}\` (${schema});`;
+            await db.query(sql);
 
             return utils.returnData(true, `Table '${tableName}' created successfully`, sql);
         } catch (error: any) {
-            return utils.returnData(false, `Error creating table: ${error.message}`, {});
+            return utils.returnData(false, `Error creating table: ${error.message}`, { sql, stack: error.stack });
         }
     }
+
+
+
 
     //INSERT
     public async insert(table: string, data: Record<string, any>) {
@@ -74,34 +79,34 @@ export default class SQL {
 
     // SELECT
     public async select(
-    table: string,
-    columns: string[] = ["*"],
-    condition?: string,
-    params: any[] = [] 
-) {
-    if (!this.validateIdentifier(table)) {
-        return utils.returnData(false, "Invalid table name", table);
+        table: string,
+        columns: string[] = ["*"],
+        condition?: string,
+        params: any[] = []
+    ) {
+        if (!this.validateIdentifier(table)) {
+            return utils.returnData(false, "Invalid table name", table);
+        }
+
+        const columnCheck = this.validateColumns(columns);
+        if (!columnCheck.success) return columnCheck;
+
+
+        let sql = `SELECT ${columns.join(", ")} FROM ${table}`;
+
+        // Add condition if provided
+        if (condition) {
+            sql += ` WHERE ${condition}`;
+        }
+
+        try {
+            const db = await this.db_connect();
+            const [rows] = await db.query(sql, params);
+            return utils.returnData(true, "Select successful", rows);
+        } catch (error: any) {
+            return utils.returnData(false, `Select failed: ${error.message}`, []);
+        }
     }
-
-    const columnCheck = this.validateColumns(columns);
-    if (!columnCheck.success) return columnCheck;
-
-   
-    let sql = `SELECT ${columns.join(", ")} FROM ${table}`;
-
-    // Add condition if provided
-    if (condition) {
-        sql += ` WHERE ${condition}`;
-    }
-
-    try {
-        const db = await this.db_connect();
-        const [rows] = await db.query(sql, params);
-        return utils.returnData(true, "Select successful", rows);
-    } catch (error: any) {
-        return utils.returnData(false, `Select failed: ${error.message}`, []);
-    }
-}
 
 
     //  DELETE
@@ -151,7 +156,7 @@ export default class SQL {
             const db = await this.db_connect();
             const [rows]: any = await db.query(sql, params);
 
-            
+
             const exists = rows[0].found === 1;
             return utils.returnData(true, "Check successful", exists);
         } catch (error: any) {

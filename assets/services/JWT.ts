@@ -6,7 +6,7 @@ dotenv.config()
 
 export default class JWT {
 
-    public utilis = new utilis()
+  public utilis = new utilis()
   private SECRET_KEY: string
 
   constructor() {
@@ -23,7 +23,7 @@ export default class JWT {
     const expiresIn = issuedAt + 60 * 60 // 1 hour expiry
 
     const tokenPayload = {
-      
+
       ...payload,
       iat: issuedAt,
       exp: expiresIn
@@ -33,16 +33,22 @@ export default class JWT {
     return token
   }
 
-  public async verifyToken(token: string){
+  public async verifyToken(token: string) {
     try {
-      const decoded =  jwt.verify(token, this.SECRET_KEY)
-      return this.utilis.returnData(true,'Successfully decoded', decoded)
+      const decoded = jwt.verify(token, this.SECRET_KEY);
+      return this.utilis.returnData(true, 'Successfully decoded', decoded);
     } catch (err: any) {
-        this.utilis.returnData(false,'error while decoded', err.decoded)
-    //   return { success: false, message: err.message }
+      let message = 'Error while decoding token';
+
+      if (err.name === 'TokenExpiredError') {
+        message = 'Token has expired';
+      } else if (err.name === 'JsonWebTokenError') {
+        message = 'Invalid token';
+      }
+
+      return this.utilis.returnData(false, message, err.message);
     }
   }
 
 
-  
 }

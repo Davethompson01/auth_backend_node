@@ -1,6 +1,6 @@
 import model from "../model/Auth.ts"
 import userModel from "../model/UserModel.ts"
-import JWT from "../services/JWT.js";
+import JWT from "../services/JWT.ts";
 import utilis from "./utilis.ts"
 
 
@@ -24,8 +24,21 @@ export default class UserController {
         // create token if true
         let token = this.utilis.generateAlphaNumeric();
 
+        //checkpassword length
+        if (password.length < 6) {
+            return 'Password is short'
+        }
+        if (password.length > 100) {
+            return 'Password has exceed the length of 100'
+        }
+
         // createpassword hash  
         let passwordHash = await this.utilis.passwordHash(password);
+        if (!password) {
+            return false
+        }
+
+        const userType = 'users'
 
         // check username
         if (username.length < 3) {
@@ -42,12 +55,22 @@ export default class UserController {
 
 
         // insert into db
-        let createUser = await this.model.createUser(username, email, passwordHash.data, token.data);
+        let createUser = await this.model.createUser(username, email, passwordHash, token.data, userType);
 
         if (!createUser.success) {
             return this.utilis.returnData(false, "Failed to create user", createUser);
         }
-        return this.utilis.returnData(true, "User created successfully", createUser);
+
+        const user = createUser.data[0]
+        const { password: _, safeUser } = user
+
+        const JWT = this.JWT.generateToken({ username, email, userType })
+        return this.utilis.returnData(true, "Account created Successfully",
+            {
+                token: JWT,
+                user: safeUser
+            }
+        )
     }
 
     public async loginUser(email: string, plainPassword: string) {
@@ -66,7 +89,7 @@ export default class UserController {
         }
 
         // return data
-        const token = await this.JWT.generateToken({email, username, user_id})
+        const token = await this.JWT.generateToken({ email, username, user_id })
         if (!token) {
             return this.utilis.returnData(false, "Login failed", [])
         }

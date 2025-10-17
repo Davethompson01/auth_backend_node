@@ -1,9 +1,9 @@
-import Database from '../../config/database.js';
-import Utilis from '../controller/utilis.js';
-import sql from './sql.js'
+import Database from '../../config/database.ts';
+import Utilis from '../controller/utilis.ts';
+import sql from './sql.ts'
 
 
-export default class UserModel {
+export default class userAuth {
 
 
     protected db_connection: any;
@@ -22,10 +22,11 @@ export default class UserModel {
 
     }
 
-    public async createUser(username: string, email: string, password: string, token: string) {
+    public async createUser(username: string, email: string, password: string, token: string, userType : string) {
+        
         // insert into database
         const insert = await this.sql.insert('users', {
-            username, email, password , token
+            username, email, password , token , userType
         })
 
         if (insert.success && insert.data.rowcount > 0) {
@@ -34,29 +35,6 @@ export default class UserModel {
 
         return this.utilis.returnData(false, "Failed to create user", insert);
     }
-
     
-
-//    // public async ge
-
-//      public async loginUser(email: string, password: string) {
-
-//         // mail exists
-//         let checkUser = await this.getMail(email)
-//         if(checkUser.success) return true
-
-//         // select password
-//         let tablePassword = [password]
-//         // let passwordVerify = password
-//         // return argon password hash to the controller
-//         let selectPassword = this.sql.select('users', tablePassword, '',[] )
-//         return selectPassword
-//     }
-
-
-
-
-
-    // console.log("UserModel loaded");
 }
 
