@@ -1,21 +1,31 @@
 import dotenv from "dotenv";
+import crypto from "crypto";
 dotenv.config();
 
-export default function verifyKey(req, res) {
+export default function verifyKey(req: any, res: any, next: Function) {
   const clientKey = req.headers["x-api-key"];
   const serverKey = process.env.API_KEY;
 
   if (!clientKey) {
-    res.writeHead(401, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "API key missing" }));
-    return false;
+    return res.status(401).json({ message: "API key missing" });
   }
 
-  if (clientKey !== serverKey) {
-    res.writeHead(403, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Invalid API key" }));
-    return false;
+  if (!serverKey) {
+    return res.status(500).json({ message: "Server misconfigured: API_KEY missing" });
   }
 
-  return true;
+  const clientBuffer = Buffer.from(clientKey);
+  const serverBuffer = Buffer.from(serverKey);
+
+  if (clientBuffer.length !== serverBuffer.length) {
+    return res.status(403).json({ message: "Invalid API key" });
+  }
+
+  const isMatch = crypto.timingSafeEqual(clientBuffer, serverBuffer);
+  if (!isMatch) {
+    return res.status(403).json({ message: "Invalid API key" });
+  }
+
+  
+  next();
 }

@@ -1,5 +1,6 @@
 import http from "http";
 import AuthRoute from "./assets/routes/AuthRoutes.ts";
+import roleMiddleWare from './assets/middlewares/roleMiddleWare.ts'
 
 class Server {
     constructor() {
@@ -13,8 +14,13 @@ class Server {
                 res.writeHead(200, { "Content-Type": "text/plain" });
                 res.end("Hello from the server!");
             } else if (req.url === "/createuserauth" && req.method === "POST") {
+                return true
+            }
+            else if (req.url === "/createuserauth" && req.method === "POST" &&  authentication()   ) {
                 this.authRoute.createUsersAccount(req, res);
-            } else {
+            }
+
+            else {
                 res.writeHead(404, { "Content-Type": "text/plain" });
                 res.end("Not Found");
             }

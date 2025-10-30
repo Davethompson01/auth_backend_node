@@ -1,7 +1,7 @@
 
 
 import argon2 from 'argon2';
-import { memoryUsage } from 'process';
+// import { memoryUsage } from 'process';
 
 
 
@@ -18,7 +18,7 @@ export default class utilis {
     }
 
 
-    public sendResponse(res: any, statusCode: number, success: boolean, message: string, data: any = null) {
+    public async sendResponse(res: any, statusCode: number, success: boolean, message: string, data: any = null) {
         return res.status(statusCode).json(this.returnData(success, message, data))
     }
 

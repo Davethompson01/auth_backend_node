@@ -32,11 +32,11 @@ export default class AdmiAuthController {
         }
 
         // is admin ==== true
-        const isAdmin = usertype
+        const isAdmin = 'admin'
 
 
         //generate token 
-        let generateAlphaNumeric = this.utilis.generateAlphaNumeric()
+        let generateAlphaNumeric = await this.utilis.generateAlphaNumeric()
         let uniqueID = generateAlphaNumeric.data
         // validate username
         if (username.length < 3) {

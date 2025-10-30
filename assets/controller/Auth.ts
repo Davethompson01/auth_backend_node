@@ -22,7 +22,7 @@ export default class UserController {
         }
 
         // create token if true
-        let token = this.utilis.generateAlphaNumeric();
+        let token = await this.utilis.generateAlphaNumeric();
 
         //checkpassword length
         if (password.length < 6) {

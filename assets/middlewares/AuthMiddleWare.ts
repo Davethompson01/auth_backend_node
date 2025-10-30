@@ -2,37 +2,36 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-
-
-export default function authMiddleware(req, res) {
+export default function authMiddleware(req: any, res: any, next: Function) {
   const secret = process.env.SECRET_KEY;
+
   if (!secret) {
-    res.writeHead(500, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Server misconfigured: SECRET_KEY missing" }));
-    return false;
+    return res.status(500).json({
+      message: "Server misconfigured: SECRET_KEY missing",
+    });
   }
 
   const authHeader = req.headers["authorization"];
   if (!authHeader) {
-    res.writeHead(401, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "No token provided" }));
-    return false;
+    return res.status(401).json({
+      message: "No token provided",
+    });
   }
 
   const token = authHeader.split(" ")[1];
   if (!token) {
-    res.writeHead(401, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Token format invalid" }));
-    return false;
+    return res.status(401).json({
+      message: "Token format invalid",
+    });
   }
 
   try {
     const decoded = jwt.verify(token, secret);
     req.user = decoded;
-    return true;
-  } catch (err) {
-    res.writeHead(401, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ message: "Invalid or expired token" }));
-    return false;
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired token",
+    });
   }
 }
