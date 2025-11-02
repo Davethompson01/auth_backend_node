@@ -1,7 +1,7 @@
-import model from "../model/Auth.ts"
-import userModel from "../model/UserModel.ts"
-import JWT from "../services/JWT.ts";
-import utilis from "./utilis.ts"
+import model from "../../model/Auth/Auth.js"
+import userModel from "../../model/userModel.js"
+import JWT from "../../services/JWT.js";
+import utilis from "../utilis.js"
 
 
 
@@ -64,7 +64,7 @@ export default class UserController {
         const user = createUser.data[0]
         const { password: _, safeUser } = user
 
-        const JWT = this.JWT.generateToken({ username, email, userType })
+        const JWT = await this.JWT.generateToken({ username, email, userType })
         return this.utilis.returnData(true, "Account created Successfully",
             {
                 token: JWT,
@@ -73,7 +73,7 @@ export default class UserController {
         )
     }
 
-    public async loginUser(email: string, plainPassword: string) {
+    async loginUser(email: string, plainPassword: string) {
         let select = await this.userModel.getUserByMail(email)
         if (!select.success || select.data.length === 0) {
             return this.utilis.returnData(false, "Can't find users", [])
@@ -88,6 +88,7 @@ export default class UserController {
             return this.utilis.returnData(false, "Wrong password", [])
         }
 
+        
         // return data
         const token = await this.JWT.generateToken({ email, username, user_id })
         if (!token) {

@@ -1,8 +1,8 @@
-import model from "../model/Auth.ts"
+import model from "../../model/Auth/Auth.js"
 import userModel from "../model/UserModel.ts"
-import JWT from "../services/JWT.ts";
-import utilis from "./utilis.ts"
-import AuthAdmin from '../model/AuthAdmin.ts'
+import JWT from "../../services/JWT.js";
+import utilis from "../utilis.js"
+import AuthAdmin from '../../model/Auth/AuthAdmin.js'
 
 
 export default class AdmiAuthController {

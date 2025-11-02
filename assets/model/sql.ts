@@ -70,8 +70,15 @@ export default class SQL {
 
         try {
             const db = await this.db_connect();
-            const [result] = await db.query(sql, values);
-            return utils.returnData(true, "Insert successful", result);
+            const [result]: any = await db.query(sql, values);
+
+            if (result.affectedRows > 0) {
+                // Fetch inserted record by ID (assuming table has 'id' as PK)
+                const [rows]: any = await db.query(`SELECT * FROM ${table} WHERE id = ?`, [result.insertId]);
+                return utils.returnData(true, "Insert successful", rows);
+            }
+
+            return utils.returnData(false, "Insert failed", result);
         } catch (error: any) {
             return utils.returnData(false, `Insert failed: ${error.message}`, {});
         }

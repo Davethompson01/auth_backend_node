@@ -2,7 +2,7 @@
 
 
 import express from "express";
-import Auth from "../controller/Auth.ts";
+import Auth from "../controller/AUTH/Auth.js";
 import verifyKey from "../middlewares/verifyKey.ts";
 import authentication from "../middlewares/roleMiddleWare.js";
 

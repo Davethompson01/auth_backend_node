@@ -1,6 +1,6 @@
-import Database from '../../config/database.ts';
-import Utilis from '../controller/utilis.ts';
-import sql from './sql.ts'
+import Database from '../../../config/database.js';
+import Utilis from '../../controller/utilis.js';
+import sql from '../sql.js'
 
 
 export default class userAuth {
@@ -22,11 +22,11 @@ export default class userAuth {
 
     }
 
-    public async createUser(username: string, email: string, password: string, token: string, userType : string) {
-        
+    public async createUser(username: string, email: string, password: string, token: string, userType: string) {
+
         // insert into database
         const insert = await this.sql.insert('users', {
-            username, email, password , token , userType
+            username, email, password, token, userType
         })
 
         if (insert.success && insert.data.rowcount > 0) {
@@ -35,6 +35,6 @@ export default class userAuth {
 
         return this.utilis.returnData(false, "Failed to create user", insert);
     }
-    
+
 }
 

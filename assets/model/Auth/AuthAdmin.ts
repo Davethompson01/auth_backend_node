@@ -1,6 +1,6 @@
 
-import utilis from '../controller/utilis.ts'
-import SQL from './sql.ts'
+import utilis from '../../controller/utilis.js'
+import SQL from '../sql.js'
 
 
 export default class AuthAdmin {
