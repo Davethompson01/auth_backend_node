@@ -1,6 +1,6 @@
 
 import db from './../../../config/database.ts'
-import sql from './../sql.ts'
+import sql from '../dbOPS.js'
 import Utilis from './../../controller/utilis.ts'
 import userModel from '../userModel.ts'
 
@@ -34,9 +34,9 @@ export default class {
         return this.utilis.returnData(false, "Failed to create user", insert);
     }
 
-    async loginPatient(email : string, password :string){
+    async loginPatient(email: string, password: string) {
 
-        
+
     }
 
 

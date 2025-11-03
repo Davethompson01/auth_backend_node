@@ -1,6 +1,6 @@
 import Database from '../../../config/database.js';
 import Utilis from '../../controller/utilis.js';
-import sql from '../sql.js'
+import sql from '../dbOPS.js'
 
 
 export default class userAuth {

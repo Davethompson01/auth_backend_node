@@ -66,35 +66,39 @@ export default class {
     }
 
 
-    async loginPatient(req: any, res: any) {
+async loginPatient(req: any, res: any) {
+  const { email, password } = req.body;
 
-        const { email, password } = req.body
+  // Validate input
+  if (!email || !password) {
+    return this.utilis.sendResponse(res, 400, false, "Email and password required", null);
+  }
 
-        // check if email exist
-        let checkEmail = await this.userModel.getUserByMail(email)
-        if (!checkEmail) {
-            return this.utilis.sendResponse(res, 400, false, " Email not found", null)
-        }
+  // Fetch user
+  const checkEmail = await this.userModel.getUserByMail(email);
+  if (!checkEmail.success || !checkEmail.data.length) {
+    return this.utilis.sendResponse(res, 404, false, "Email not found", null);
+  }
 
-        // get result 
-        let result = await checkEmail.data[0]
-        let username = result.username
-        let mail = result.email
-        let user_id = result.user_id
+  const user = checkEmail.data[0];
 
-        //password decode 
-        let passwordVerify = await this.utilis.passwordVerify(result.password, password)
-        if (!passwordVerify) {
-            return await this.utilis.sendResponse(res, 400, false, "Password does not match", [])
-        }
+  // Verify password
+  const passwordValid = await this.utilis.passwordVerify(user.password, password);
+  if (!passwordValid) {
+    return this.utilis.sendResponse(res, 401, false, "Invalid password", null);
+  }
 
-        const token = this.JWT.generateToken({ username, mail, user_id })
-        if (!token) {
-            return this.utilis.sendResponse(res, 400, false, "Failed to login", [])
-        }
+  // Generate tokens
+  const payload = { user_id: user.user_id, username: user.username, mail: user.email };
+  const accessToken = this.JWT.generateAccessToken(payload);
+  const refreshToken = this.JWT.generateRefreshToken(payload);
 
-        return this.utilis.sendResponse(res, 200, true, "Login successful ", token)
-    }
+  // Store refresh token in DB (optional)
+  await this.userModel.saveRefreshToken(user.user_id, refreshToken);
+
+  return this.utilis.sendResponse(res, 200, true, "Login successful", { accessToken, refreshToken });
+}
+
 
 
 

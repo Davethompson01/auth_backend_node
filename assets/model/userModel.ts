@@ -1,8 +1,8 @@
 import utilis from '../controller/utilis.ts'
-import sql from './sql.ts'
+import sql from './dbOPS.js'
 
 
-export default class userModel{
+export default class userModel {
 
     protected sql = new sql()
     protected utilis = new utilis()
@@ -24,16 +24,16 @@ export default class userModel{
     }
 
 
-    public async getUserByMail(email : string){
+    public async getUserByMail(email: string) {
         let select = await this.sql.select(
             "users",
-            ['user_id', 'username', 'password' , 'email'],
+            ['user_id', 'username', 'password', 'email'],
             "email = ?",
             [email]
         )
-        if(!select.success){
+        if (!select.success) {
             return this.utilis.returnData(false, "Selecting from db Failed", select)
-        }else{
+        } else {
             return this.utilis.returnData(true, `Select from ${email} successful`, select)
         }
     }

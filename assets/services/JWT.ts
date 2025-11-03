@@ -33,6 +33,11 @@ export default class JWT {
     return token
   }
 
+
+  async generateRefreshToken(payload: object) {
+    return jwt.sign(payload, process.env.REFRESH_SECRET, { expiresIn: "7d" });
+  }
+
   public async verifyToken(token: string) {
     try {
       const decoded = jwt.verify(token, this.SECRET_KEY);

@@ -1,6 +1,6 @@
 
 import utilis from '../../controller/utilis.js'
-import SQL from '../sql.js'
+import SQL from '../dbOPS.js'
 
 
 export default class AuthAdmin {
