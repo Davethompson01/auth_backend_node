@@ -7,7 +7,7 @@ import db from './../../../config/database.ts'
 import sql from '../dbOPS.js'
 import Utilis from './../../controller/utilis.ts'
 
-export default class {
+export default class DoctorAuth {
 
 
     protected database: any

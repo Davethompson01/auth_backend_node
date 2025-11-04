@@ -7,6 +7,7 @@ import utilis from "../controller/utilis.ts";
 const router = express.Router();
 const doctorAuth = new docAuth();
 const utils = new utilis();
+const AuthPatient = new Auth()
 
 // This route will only create patient accounts
 router.post("/createAccount/patient", verifyKey, async (req, res) => {
@@ -19,8 +20,9 @@ router.post("/createAccount/patient", verifyKey, async (req, res) => {
     }
 
     // controller function
-    const createPatient = await auth.createPatient(req, res);
-    return res.status(201).json(createPatient);
+    const createPatient = await AuthPatient.createPatient(req, res);
+    // return res.status(201).json(createPatient);
+    return utils.sendResponse(res, 201, true, '', createPatient)
 
   } catch (error) {
     console.error(error);

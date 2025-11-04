@@ -4,7 +4,7 @@ import sql from '../dbOPS.js'
 import Utilis from './../../controller/utilis.ts'
 import userModel from '../userModel.ts'
 
-export default class {
+export default class patientAuth{
 
 
     protected database: any
