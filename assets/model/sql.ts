@@ -19,9 +19,12 @@ export default class sql extends dbOPS {
     public async createPatientTable() {
         const results = await this.createTable(
             'patients',
+
             `patient_id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
             patient_token VARCHAR(100) UNIQUE,
+            profile_image LONGTEXT NULL
             user_type VARCHAR(100) NOT NULL,
+            
             username VARCHAR(100) NOT NULL,
             email VARCHAR(100) UNIQUE NOT NULL,
             password VARCHAR(255) NOT NULL,
@@ -51,6 +54,18 @@ export default class sql extends dbOPS {
             FOREIGN KEY (patient_id) REFERENCES patients(patient_id)
             `
         )
+    }
+
+
+    async createApppointment(){
+        const results = this.createTable
+        ('appointments',
+            `patient_id INT 
+            doctor_id INT,
+            FOREIGN KEY
+            `
+        )
+
     }
 
     async createPrescriptions() {

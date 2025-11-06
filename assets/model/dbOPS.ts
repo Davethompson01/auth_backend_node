@@ -171,4 +171,112 @@ export default class dbOPS {
         }
     }
 
+
+    // UPDATE
+    public async update(
+        table: string,
+        data: Record<string, any>,
+        condition: string,
+        params: any[] = []
+    ) {
+        if (!this.validateIdentifier(table)) {
+            return utils.returnData(false, "Invalid table name", table);
+        }
+
+        const columns = Object.keys(data);
+        const validation = this.validateColumns(columns);
+        if (!validation.success) return validation;
+
+        const setClause = columns.map(col => `${col} = ?`).join(", ");
+        const values = Object.values(data);
+
+        // Combine update values + condition params
+        const sqlParams = [...values, ...params];
+
+        const sql = `UPDATE ${table} SET ${setClause} WHERE ${condition}`;
+
+        try {
+            const db = await this.db_connect();
+
+
+            await db.beginTransaction();
+
+            const [result]: any = await db.query(sql, sqlParams);
+
+            // Commit transaction for atomicity
+            await db.commit();
+
+            if (result.affectedRows > 0) {
+                return utils.returnData(true, "Update successful", {
+                    affectedRows: result.affectedRows,
+                    changedRows: result.changedRows,
+                });
+            } else {
+                return utils.returnData(false, "No rows were updated", result);
+            }
+
+        } catch (error: any) {
+            // Rollback in case of failure
+            try {
+                const db = await this.db_connect();
+                await db.rollback();
+            } catch { }
+            return utils.returnData(false, `Update failed: ${error.message}`, {});
+        }
+    }
+
+
+    public async selectRandom(
+        table: string,
+        columns: string[] = ["*"],
+        limit: number = 1,
+        idColumn: string = "id"
+    ) {
+        if (!this.validateIdentifier(table)) {
+            return utils.returnData(false, "Invalid table name", table);
+        }
+
+        if (!this.validateIdentifier(idColumn)) {
+            return utils.returnData(false, "Invalid ID column name", idColumn);
+        }
+
+        const columnCheck = this.validateColumns(columns);
+        if (!columnCheck.success) return columnCheck;
+
+        let sql = "";
+        try {
+            const db = await this.db_connect();
+
+            // Get min and max ID — uses index, very fast even with millions of rows
+            const [rangeResult]: any = await db.query(
+                `SELECT MIN(${idColumn}) AS minId, MAX(${idColumn}) AS maxId FROM \`${table}\``
+            );
+
+            const minId = rangeResult[0].minId;
+            const maxId = rangeResult[0].maxId;
+
+            if (minId === null || maxId === null) {
+                return utils.returnData(false, `Table '${table}' has no data`, []);
+            }
+
+            //  Generate a random ID between min and max
+            const randomId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
+
+            // Select starting from that random ID
+            sql = `SELECT ${columns.join(", ")} FROM \`${table}\` WHERE ${idColumn} >= ? LIMIT ?`;
+            let [rows]: any = await db.query(sql, [randomId, limit]);
+
+            // Fallback if we didn't get enough rows
+            if (rows.length < limit) {
+                sql = `SELECT ${columns.join(", ")} FROM \`${table}\` WHERE ${idColumn} < ? ORDER BY ${idColumn} DESC LIMIT ?`;
+                const [fallbackRows]: any = await db.query(sql, [randomId, limit]);
+                rows = [...rows, ...fallbackRows].slice(0, limit);
+            }
+
+            return utils.returnData(true, `Random record(s) from '${table}'`, rows);
+        } catch (error: any) {
+            return utils.returnData(false, `Random select failed: ${error.message}`, { sql, stack: error.stack });
+        }
+    }
+
 }
