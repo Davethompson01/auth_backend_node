@@ -41,4 +41,22 @@ export default class doctorModel {
         }
         return this.utilis.returnData(true, "fetch Patients from db successful", random)
     }
+
+
+    public async searchForpatient(username: String) {
+
+        const select = await this.sql.select(
+            'appointment',
+            ['patient_id,', 'username', 'message'],
+            'username = ?',
+            [username]
+        )
+        if (!username) {
+            return this.utilis.returnData(false, "Can't find name", [])
+        }
+        return this.utilis.returnData(true, " checking DB", select)
+
+    }
+
+    
 }
