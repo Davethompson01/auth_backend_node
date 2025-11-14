@@ -11,7 +11,7 @@ export default class medicalRecordController {
 
     public async checkPatientRecordExist(req: any, res: any) {
         try {
-            
+
             const patient_id = req.params.patient_id || req.query.patient_id || req.body.patient_id;
             if (!patient_id) {
                 return this.utilis.sendResponse(res, 400, false, "patient_id is required", null);
